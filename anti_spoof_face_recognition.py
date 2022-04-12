@@ -9,6 +9,7 @@ Original file is located at
 
 # !pip install Pillow
 
+from ctypes import resize
 import os
 from PIL import Image
 import numpy as np
@@ -22,9 +23,8 @@ from keras.layers import Dense
 from keras.models import model_from_json
 from keras.preprocessing.image import ImageDataGenerator
 
-from scipy.ndimage import imread
-from scipy.misc import imresize, imsave
-
+from matplotlib.pyplot import imread
+from matplotlib.pyplot import  imsave
 # !wget https://raw.githubusercontent.com/niravnb/Anti-Spoofing-Facial-Recognition/master/dataset.zip
 
 # !unzip dataset.zip
@@ -71,6 +71,7 @@ from tensorflow.keras.models import load_model
 
 def load_pretrained_model():
     model = load_model('eye_status_classifier.h5')
+    print("hellp")
     model.summary()
     return model
     
@@ -112,7 +113,7 @@ def train(train_generator, val_generator):
 
 def predict(img, model):
 	img = Image.fromarray(img, 'RGB').convert('L')
-	img = imresize(img, (IMG_SIZE,IMG_SIZE)).astype('float32')
+	img =  img.resize(IMG_SIZE,IMG_SIZE).astype('float32')
 	img /= 255
 	img = img.reshape(1,IMG_SIZE,IMG_SIZE,1)
 	prediction = model.predict(img)
