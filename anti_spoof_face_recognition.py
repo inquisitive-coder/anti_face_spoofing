@@ -11,6 +11,7 @@ Original file is located at
 
 from ctypes import resize
 import os
+from turtle import mode
 from PIL import Image
 import numpy as np
 
@@ -28,7 +29,8 @@ from matplotlib.pyplot import  imsave
 # !wget https://raw.githubusercontent.com/niravnb/Anti-Spoofing-Facial-Recognition/master/dataset.zip
 
 # !unzip dataset.zip
-
+global ashish_model
+ashish_model="something"
 IMG_SIZE = 24
 
 def collect():
@@ -71,7 +73,6 @@ from tensorflow.keras.models import load_model
 
 def load_pretrained_model():
     model = load_model('eye_status_classifier.h5')
-    print("hellp")
     model.summary()
     return model
     
@@ -113,10 +114,10 @@ def train(train_generator, val_generator):
 
 def predict(img, model):
 	img = Image.fromarray(img, 'RGB').convert('L')
-	img =  img.resize(IMG_SIZE,IMG_SIZE).astype('float32')
-	img /= 255
-	img = img.reshape(1,IMG_SIZE,IMG_SIZE,1)
-	prediction = model.predict(img)
+	#img =  img.resize(IMG_SIZE,IMG_SIZE,3).astype('float32')
+	#img /= 255
+	#img = img.reshape(1,IMG_SIZE,IMG_SIZE,1)
+	prediction = model.predict(np.array(img))
 	if prediction < 0.1:
 		prediction = 'closed'
 	elif prediction > 0.90:
@@ -131,9 +132,9 @@ def evaluate(X_test, y_test):
 	loss, acc = model.evaluate(X_test, y_test, verbose = 0)
 	print(acc * 100)
 
-# train_generator , val_generator = collect()
+train_generator , val_generator = collect()
 
-# train(train_generator,val_generator)
+#train(train_generator,val_generator)
 
 
 
@@ -156,7 +157,7 @@ def init():
     open_eye_cascPath = 'haarcascade_eye_tree_eyeglasses.xml'
     left_eye_cascPath = 'haarcascade_lefteye_2splits.xml'
     right_eye_cascPath ='haarcascade_righteye_2splits.xml'
-    dataset = 'faces'
+    dataset = 'dataset/train'
 
     face_detector = cv2.CascadeClassifier(face_cascPath)
     open_eyes_detector = cv2.CascadeClassifier(open_eye_cascPath)
@@ -164,6 +165,7 @@ def init():
     right_eye_detector = cv2.CascadeClassifier(right_eye_cascPath)
 
     model = load_pretrained_model()
+    #model=ashish_model
 
 
     print("[LOG] Collecting images ...")
@@ -179,7 +181,7 @@ def process_and_encode(images):
     known_encodings = []
     known_names = []
     print("[LOG] Encoding faces ...")
-
+    encodings="ddd"
     for image_path in tqdm(images):
         # Load image
         image = cv2.imread(image_path)
@@ -198,8 +200,8 @@ def process_and_encode(images):
         if len(encoding) > 0 : 
             known_encodings.append(encoding[0])
             known_names.append(name)
-
         encodings = {"encodings": known_encodings, "names": known_names}
+        #print("something=",encodings)
         np.save('encodings.npy', encodings) 
 
 
@@ -218,7 +220,7 @@ def isBlinking(history, maxFrames):
 def detect_and_display(model, video_capture, face_detector, open_eyes_detector, left_eye_detector, right_eye_detector, data, eyes_detected):
         frame = video_capture.read()
         # resize the frame
-        # frame = cv2.resize(frame, (0, 0), fx=0.9, fy=0.9)
+        frame = cv2.resize(frame, (0, 0), fx=0.9, fy=0.9)
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -349,7 +351,7 @@ def detect_and_display(model, video_capture, face_detector, open_eyes_detector, 
 
 (model, face_detector, open_eyes_detector,left_eye_detector,right_eye_detector, images) = init()
 
-# data = process_and_encode(images)
+#data = process_and_encode(images)
 data = np.load('encodings.npy',allow_pickle='TRUE').item()
 
 
