@@ -110,12 +110,18 @@ def train(train_generator, val_generator):
                     epochs=20
     )
     save_model(model)
-
+def hello(img):
+    temp=np.asarray(img,dtype=np.float32)
+    temp/=255
+    temp=np.reshape(temp,(1,IMG_SIZE,IMG_SIZE,1))
+    print("shape=\n\n\n\n",temp.shape)
+    return temp
+    #return Image.fromarray(temp, 'RGB').convert('L')
 def predict(img, model):
 	img = Image.fromarray(img, 'RGB').convert('L')
-	img =  img.resize(IMG_SIZE,IMG_SIZE).astype('float32')
-	img /= 255
-	img = img.reshape(1,IMG_SIZE,IMG_SIZE,1)
+	img =  img.resize((IMG_SIZE,IMG_SIZE),Image.BICUBIC)
+	img =hello(img)
+	#img = img.reshape(1,IMG_SIZE,IMG_SIZE,1)
 	prediction = model.predict(img)
 	if prediction < 0.1:
 		prediction = 'closed'
@@ -170,7 +176,8 @@ def init():
     images = []
     for direc, _, files in tqdm(os.walk(dataset)):
         for file in files:
-            if file.endswith("jpg"):
+            print("file=",file)
+            if file.endswith("jpeg"):
                 images.append(os.path.join(direc,file))
     return (model,face_detector, open_eyes_detector, left_eye_detector,right_eye_detector, images)
 
@@ -179,7 +186,7 @@ def process_and_encode(images):
     known_encodings = []
     known_names = []
     print("[LOG] Encoding faces ...")
-
+    print("hello world 1")
     for image_path in tqdm(images):
         # Load image
         image = cv2.imread(image_path)
@@ -194,17 +201,12 @@ def process_and_encode(images):
 
         # the person's name is the name of the folder where the image comes from
         name = image_path.split(os.path.sep)[-2]
-
+        print("hello world 1")
         if len(encoding) > 0 : 
             known_encodings.append(encoding[0])
             known_names.append(name)
-
         encodings = {"encodings": known_encodings, "names": known_names}
         np.save('encodings.npy', encodings) 
-
-
-    return encodings
-
 def isBlinking(history, maxFrames):
     """ @history: A string containing the history of eyes status 
          where a '1' means that the eyes were closed and '0' open.
@@ -349,7 +351,10 @@ def detect_and_display(model, video_capture, face_detector, open_eyes_detector, 
 
 (model, face_detector, open_eyes_detector,left_eye_detector,right_eye_detector, images) = init()
 
-# data = process_and_encode(images)
+print("images= ",images)
+
+#process_and_encode(images)
+
 data = np.load('encodings.npy',allow_pickle='TRUE').item()
 
 
