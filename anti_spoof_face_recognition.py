@@ -71,45 +71,10 @@ from tensorflow.keras.models import load_model
 
 def load_pretrained_model():
     model = load_model('eye_status_classifier.h5')
-    print("hellp")
     model.summary()
     return model
     
-def train(train_generator, val_generator):
-    STEP_SIZE_TRAIN=train_generator.n//train_generator.batch_size
-    STEP_SIZE_VALID=val_generator.n//val_generator.batch_size
 
-    print('[LOG] Intialize Neural Network')
-
-    model = Sequential()
-
-    model.add(Conv2D(filters=6, kernel_size=(3, 3), activation='relu', input_shape=(IMG_SIZE,IMG_SIZE,1)))
-    model.add(MaxPooling2D())
-
-    model.add(Conv2D(filters=16, kernel_size=(3, 3), activation='relu'))
-    model.add(MaxPooling2D())
-
-    model.add(Conv2D(filters=32, kernel_size=(3, 3), activation='relu'))
-    model.add(MaxPooling2D())
-
-    model.add(Flatten())
-
-    model.add(Dense(units=120, activation='relu'))
-
-    model.add(Dense(units=84, activation='relu'))
-
-    model.add(Dense(units=1, activation = 'sigmoid'))
-
-
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-    model.fit_generator(generator=train_generator,
-                    steps_per_epoch=STEP_SIZE_TRAIN,
-                    validation_data=val_generator,
-                    validation_steps=STEP_SIZE_VALID,
-                    epochs=20
-    )
-    save_model(model)
 def hello(img):
     temp=np.asarray(img,dtype=np.float32)
     temp/=255
@@ -121,11 +86,11 @@ def predict(img, model):
 	img = Image.fromarray(img, 'RGB').convert('L')
 	img =  img.resize((IMG_SIZE,IMG_SIZE),Image.BICUBIC)
 	img =hello(img)
-	#img = img.reshape(1,IMG_SIZE,IMG_SIZE,1)
 	prediction = model.predict(img)
-	if prediction < 0.1:
+	print("\nprediction=",prediction,"\n")
+	if prediction < 0.2:
 		prediction = 'closed'
-	elif prediction > 0.90:
+	elif prediction > 0.7:
 		prediction = 'open'
 	else:
 		prediction = 'idk'
@@ -177,7 +142,7 @@ def init():
     for direc, _, files in tqdm(os.walk(dataset)):
         for file in files:
             print("file=",file)
-            if file.endswith("jpeg"):
+            if file.endswith("jpeg") or file.endswith("jpg") or file.endswith("png"):
                 images.append(os.path.join(direc,file))
     return (model,face_detector, open_eyes_detector, left_eye_detector,right_eye_detector, images)
 
@@ -339,11 +304,10 @@ def detect_and_display(model, video_capture, face_detector, open_eyes_detector, 
                 cv2.putText(frame, 'Real: '+name, (x, y), cv2.FONT_HERSHEY_SIMPLEX,0.75, (0, 255, 0), 2)
                 # eyes_detected[name] = '111'
             else:
-                if len(eyes_detected[name]) > 20:
-                    cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 2)
-                    # Display name
-                    y = y - 15 if y - 15 > 15 else y + 15
-                    cv2.putText(frame, 'Fake: '+name, (x, y), cv2.FONT_HERSHEY_SIMPLEX,0.75, (0, 0, 255), 2)
+                cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 2)
+                # Display name
+                y = y - 15 if y - 15 > 15 else y + 15
+                cv2.putText(frame, 'Fake: '+name, (x, y), cv2.FONT_HERSHEY_SIMPLEX,0.75, (0, 0, 255), 2)
 
 
         return frame
@@ -364,7 +328,7 @@ video_capture = VideoStream(src=0).start()
 eyes_detected = defaultdict(str)
 while True:
   frame = detect_and_display(model, video_capture, face_detector, open_eyes_detector,left_eye_detector,right_eye_detector, data, eyes_detected)
-  cv2.imshow("Eye-Blink based Liveness Detection for Facial Recognition", frame)
+  cv2.imshow("Liveness Detection for Facial Recognition", frame)
   if cv2.waitKey(1) & 0xFF == ord('q'):
       break
 cv2.destroyAllWindows()
