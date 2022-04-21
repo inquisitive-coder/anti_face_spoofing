@@ -3,6 +3,15 @@ from keras.layers import Conv2D
 from keras.layers import AveragePooling2D, MaxPooling2D
 from keras.layers import Flatten
 from keras.layers import Dense
+from train import *
+from tensorflow.keras.models import load_model
+IMG_SIZE = 24
+def load_pretrained_model():
+    model = load_model('eye_status_classifier.h5')
+    model.summary()
+    return model
+def save_model(model):
+  model.save('eye_status_classifier.h5')
 def train(train_generator, val_generator):
     STEP_SIZE_TRAIN=train_generator.n//train_generator.batch_size
     STEP_SIZE_VALID=val_generator.n//val_generator.batch_size
