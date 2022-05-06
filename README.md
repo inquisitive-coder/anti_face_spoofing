@@ -1,5 +1,4 @@
-# Anti Spoofing in Face Recognition
+to Run the code use following command
 
-Implemented an eye-blink detection based real-time liveness detection algorithm for face recognition.
-
-Video: https://youtu.be/sNm2gxsGn-o
+pip install -r requirements.txt
+python main.py

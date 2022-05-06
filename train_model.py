@@ -3,7 +3,6 @@ from keras.layers import Conv2D
 from keras.layers import AveragePooling2D, MaxPooling2D
 from keras.layers import Flatten
 from keras.layers import Dense
-from train import *
 from tensorflow.keras.models import load_model
 IMG_SIZE = 24
 def load_pretrained_model():
@@ -36,10 +35,11 @@ def train(train_generator, val_generator):
     model.add(Dense(units=84, activation='relu'))
 
     model.add(Dense(units=1, activation = 'sigmoid'))
+   
 
 
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-
+    print(model.summary())
     model.fit_generator(generator=train_generator,
                     steps_per_epoch=STEP_SIZE_TRAIN,
                     validation_data=val_generator,

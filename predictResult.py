@@ -4,6 +4,9 @@ import os
 import numpy as np
 from PIL import Image
 from train_model import IMG_SIZE
+
+from datetime import datetime
+
 def predict(img, model):
 	img = Image.fromarray(img, 'RGB').convert('L')
 	img =  img.resize((IMG_SIZE,IMG_SIZE),Image.BICUBIC)
@@ -110,7 +113,6 @@ def invoke(model, video_capture, face_detector, open_eyes_detector, left_eye_det
                     cv2.rectangle(left_face,(ex,ey),(ex+ew,ey+eh),color,2)
                 eyes_detected[name] += eye_status
 
-           
             if isBlinking(eyes_detected[name],3):
                 cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
                 y = y - 15 if y - 15 > 15 else y + 15
